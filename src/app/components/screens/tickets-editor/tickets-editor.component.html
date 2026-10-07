@@ -1,11 +1,219 @@
-<c-row ngPreserveWhitespaces>
-  <c-col xs="12">
+<c-row>
+  <c-col xs="12" lg="7">
+    <c-card class="mb-4">
+      <c-card-header><strong>Configuración de vista previa</strong></c-card-header>
+      <c-card-body>
+        <form cForm [formGroup]="settingsForm">
+          <c-row>
+            <c-col md="4" class="mb-3">
+              <label cLabel for="dpi">DPI de la impresora</label>
+              <input cFormControl id="dpi" type="number" min="72" formControlName="dpi" />
+              <div cFormText>Resolución a emular (ej. 203 o 300).</div>
+            </c-col>
+            <c-col md="4" class="mb-3">
+              <label cLabel for="maxChars">Caracteres por línea</label>
+              <input cFormControl id="maxChars" type="number" min="1" formControlName="maxChars" />
+              <div cFormText>Máximo de caracteres del ticket.</div>
+            </c-col>
+            <c-col md="4" class="mb-3">
+              <label cLabel for="widthMm">Ancho del papel (mm)</label>
+              <input cFormControl id="widthMm" type="number" min="10" formControlName="widthMm" />
+              <div cFormText>Ej. 58 u 80 mm.</div>
+            </c-col>
+          </c-row>
+          <c-form-check switch>
+            <input cFormCheckInput id="showGrid" type="checkbox" formControlName="showGrid" />
+            <label cFormCheckLabel for="showGrid">Mostrar cuadrícula (1 cuadro = 1 carácter)</label>
+          </c-form-check>
+        </form>
+      </c-card-body>
+    </c-card>
+
+    <c-card class="mb-4">
+      <c-card-header><strong>Elemento seleccionado</strong></c-card-header>
+      <c-card-body>
+        @if (!selection) {
+          <p class="text-body-secondary mb-0">
+            Haz clic en un elemento de la vista previa para editarlo, o agrega uno nuevo.
+          </p>
+        } @else {
+          <form cForm [formGroup]="elementForm">
+            <c-row>
+              <c-col md="6" class="mb-3">
+                <label cLabel for="typeContent">Tipo de elemento</label>
+                <select cSelect id="typeContent" formControlName="typeContent">
+                  <option value="TEXT">Texto</option>
+                  <option value="TABLE">Tabla</option>
+                </select>
+              </c-col>
+              <c-col md="6" class="mb-3">
+                <label cLabel for="position">Alineación</label>
+                <select cSelect id="position" formControlName="position">
+                  @for (p of positions; track p.value) {
+                    <option [value]="p.value">{{ p.label }}</option>
+                  }
+                </select>
+              </c-col>
+            </c-row>
+
+            <c-form-check class="mb-3">
+              <input cFormCheckInput id="bold" type="checkbox" formControlName="bold" />
+              <label cFormCheckLabel for="bold">Negritas</label>
+            </c-form-check>
+
+            @if (!isTable) {
+              <div class="mb-3">
+                <label cLabel for="content">Contenido</label>
+                <input cFormControl id="content" type="text" formControlName="content" />
+                <div cFormText>
+                  Usa variables entre llaves, ej. {{ '{customerName}' }}, {{ '{rfc}' }}, {{ '{grandTotal}' }}. Haz clic en una para insertarla:
+                </div>
+                <div class="variable-list mt-2">
+                  @for (v of variables; track v) {
+                    <button type="button" class="badge text-bg-light border" (click)="insertVariable(v)">{{ v }}</button>
+                  }
+                </div>
+              </div>
+              <c-row>
+                <c-col md="6" class="mb-3">
+                  <label cLabel for="elMaxChars">Máx. caracteres</label>
+                  <input cFormControl id="elMaxChars" type="number" min="1" formControlName="maxChars" />
+                </c-col>
+                <c-col md="6" class="mb-3">
+                  <label cLabel for="dataType">Tipo de dato</label>
+                  <select cSelect id="dataType" formControlName="dataType">
+                    @for (d of dataTypes; track d.value) {
+                      <option [value]="d.value">{{ d.label }}</option>
+                    }
+                  </select>
+                </c-col>
+              </c-row>
+            } @else {
+              <div class="mb-3">
+                <label cLabel for="field">Campo de datos (lista)</label>
+                <input cFormControl id="field" type="text" formControlName="field" />
+                <div cFormText>Nombre de la lista con las filas. Disponibles: {{ lists.join(', ') }}. Si no existe, se generan filas de ejemplo con los campos de las columnas.</div>
+              </div>
+
+              <h6>Columnas</h6>
+              <div formArrayName="columns">
+                @for (col of columns.controls; track col; let i = $index) {
+                  <div class="border rounded p-2 mb-2" [formGroupName]="i">
+                    <c-row>
+                      <c-col md="6" class="mb-2">
+                        <label cLabel>Campo</label>
+                        <input cFormControl type="text" formControlName="field" />
+                      </c-col>
+                      <c-col md="6" class="mb-2">
+                        <label cLabel>Título</label>
+                        <input cFormControl type="text" formControlName="title" />
+                      </c-col>
+                      <c-col md="4" class="mb-2">
+                        <label cLabel>Alineación</label>
+                        <select cSelect formControlName="position">
+                          @for (p of positions; track p.value) {
+                            <option [value]="p.value">{{ p.label }}</option>
+                          }
+                        </select>
+                      </c-col>
+                      <c-col md="4" class="mb-2">
+                        <label cLabel>Máx. caracteres</label>
+                        <input cFormControl type="number" min="1" formControlName="maxChars" />
+                      </c-col>
+                      <c-col md="4" class="mb-2">
+                        <label cLabel>Tipo de dato</label>
+                        <select cSelect formControlName="dataType">
+                          @for (d of dataTypes; track d.value) {
+                            <option [value]="d.value">{{ d.label }}</option>
+                          }
+                        </select>
+                      </c-col>
+                    </c-row>
+                    <button cButton color="danger" variant="outline" size="sm" type="button" (click)="removeColumn(i)">
+                      Quitar columna
+                    </button>
+                  </div>
+                }
+              </div>
+              <button cButton color="primary" variant="outline" size="sm" type="button" (click)="addColumn()">
+                + Agregar columna
+              </button>
+            }
+
+            <hr />
+            <div class="d-flex gap-2 flex-wrap">
+              <button cButton color="secondary" variant="outline" type="button" (click)="moveElement(-1)">↑ Subir</button>
+              <button cButton color="secondary" variant="outline" type="button" (click)="moveElement(1)">↓ Bajar</button>
+              <button cButton color="danger" type="button" (click)="removeElement()">Eliminar elemento</button>
+            </div>
+          </form>
+        }
+      </c-card-body>
+    </c-card>
+
+    <c-card class="mb-4">
+      <c-card-header><strong>Agregar elementos</strong></c-card-header>
+      <c-card-body class="d-flex gap-2 flex-wrap">
+        @for (s of sections; track s.value) {
+          <button cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'TEXT')">
+            + Texto en {{ s.label }}
+          </button>
+          <button cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'TABLE')">
+            + Tabla en {{ s.label }}
+          </button>
+        }
+      </c-card-body>
+    </c-card>
+
+    <button cButton color="success" type="button" (click)="save()">Crear ticket (generar JSON)</button>
+    @if (submitted) {
+      <pre class="mt-3 p-3 border rounded bg-body-tertiary">{{ jsonOutput }}</pre>
+    }
+  </c-col>
+
+  <c-col xs="12" lg="5">
     <c-card class="mb-4">
       <c-card-header>
-        <strong>Tickets Editor</strong>
+        <strong>Vista previa</strong>
+        <small class="text-body-secondary ms-2">{{ settings.widthMm }} mm · {{ settings.dpi }} dpi · {{ settings.maxChars }} car.</small>
       </c-card-header>
-      <c-card-body>
-        </c-card-body>
+      <c-card-body class="preview-wrapper">
+        <div class="ticket-paper" [class.show-grid]="settings.showGrid" [style.width.px]="widthPx" [style.font-size.px]="fontSizePx">
+          @for (s of sections; track s.value) {
+            <div class="ticket-section-title">{{ s.label }}</div>
+            <div class="ticket-grid" [style.width.ch]="settings.maxChars">
+            @for (el of ticket[s.value]; track $index; let i = $index) {
+              <div
+                class="ticket-el"
+                [class.selected]="isSelected(s.value, i)"
+                [style.font-weight]="el.bold ? 'bold' : 'normal'"
+                [class.drag-over]="dragOver?.section === s.value && dragOver?.index === i"
+                draggable="true"
+                (click)="select(s.value, i)"
+                (dragstart)="onDragStart($event, s.value, i)"
+                (dragover)="onDragOver($event, s.value, i)"
+                (drop)="onDrop($event, s.value, i)"
+                (dragend)="onDragEnd()"
+              >
+                @if (isSelected(s.value, i)) {
+                  <span class="move-buttons">
+                    <button type="button" title="Subir" [disabled]="i === 0" (click)="moveElement(-1); $event.stopPropagation()">▲</button>
+                    <button type="button" title="Bajar" [disabled]="i === ticket[s.value].length - 1" (click)="moveElement(1); $event.stopPropagation()">▼</button>
+                  </span>
+                }
+                @if (el.typeContent === 'TEXT') {
+                  <div class="ticket-line">{{ renderText(el) }}</div>
+                } @else {
+                  @for (line of tableLines(el); track $index; let first = $first) {
+                    <div class="ticket-line" [style.font-weight]="first ? 'bold' : 'inherit'">{{ line }}</div>
+                  }
+                }
+              </div>
+            }
+            </div>
+          }
+        </div>
+      </c-card-body>
     </c-card>
   </c-col>
 </c-row>
