@@ -1,0 +1,10 @@
+/* You can add global styles to this file, and also import other style files */
+@use "@coreui/coreui/scss/coreui" as * with (
+  $enable-deprecation-messages: false
+);
+
+// Import Chart.js custom tooltips styles
+//@use "@coreui/chartjs/scss/coreui-chartjs";
+
+
+@use "_theme";
