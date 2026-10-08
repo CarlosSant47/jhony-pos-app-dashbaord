@@ -2,11 +2,36 @@
   background: #fff;
   color: #000;
   font-family: 'Courier New', 'Liberation Mono', Courier, monospace;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  padding: 8px 0;
-  margin: 0 auto;
+    padding-top: 24px;
+  padding-bottom: 24px;
+  margin: 24px auto;
   box-sizing: border-box;
   line-height: 1.25;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+
+  // Torn-paper zigzag edges
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: #fff;
+  }
+
+  &::before {
+    top: -8px;
+    -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 12px 100%;
+    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 12px 100%;
+  }
+
+  &::after {
+    bottom: -8px;
+    -webkit-mask: conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% / 12px 100%;
+    mask: conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% / 12px 100%;
+  }
 }
 
 .ticket-section-title {
@@ -22,23 +47,24 @@
 .ticket-el {
   position: relative;
   cursor: grab;
-  outline: 1px dashed transparent;
+  border-radius: 3px;
+  transition: background 0.12s, box-shadow 0.12s;
 
   &:hover {
-    outline-color: #8a93a2;
-    background: rgba(50, 31, 219, 0.05);
+    background: rgba(var(--cui-primary-rgb), 0.05);
   }
 
   &.selected {
-    outline: 2px solid #321fdb;
-    background: rgba(50, 31, 219, 0.1);
+    background: rgba(var(--cui-primary-rgb), 0.08);
+    box-shadow: 0 0 0 2px rgba(var(--cui-primary-rgb), 0.55), 0 0 0 5px rgba(var(--cui-primary-rgb), 0.12);
+    z-index: 2;
   }
 }
 
 .preview-wrapper {
   overflow-x: auto;
   background: #e4e7ed;
-  padding: 16px 64px 16px 16px;
+  padding: 24px;
 }
 
 .ticket-line {
@@ -47,37 +73,9 @@
 }
 
 .ticket-el.drag-over {
-  box-shadow: 0 -3px 0 #321fdb;
+  box-shadow: 0 -3px 0 var(--cui-primary);
 }
 
-.move-buttons {
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  margin-left: 6px;
-  transform: translateY(-50%);
-  display: flex;
-  gap: 2px;
-  z-index: 1;
-
-  button {
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    font-size: 9px;
-    line-height: 1;
-    border: 1px solid #321fdb;
-    border-radius: 3px;
-    background: #fff;
-    color: #321fdb;
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.35;
-      cursor: default;
-    }
-  }
-}
 
 .ticket-grid {
   margin: 0 auto;
@@ -89,8 +87,8 @@
 
 .show-grid .ticket-line {
   background-image:
-    linear-gradient(to right, rgba(50, 31, 219, 0.25) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(50, 31, 219, 0.25) 1px, transparent 1px);
+    linear-gradient(to right, rgba(var(--cui-primary-rgb), 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--cui-primary-rgb), 0.25) 1px, transparent 1px);
   background-size: 1ch 1.25em;
 }
 
@@ -109,4 +107,91 @@
     cursor: pointer;
     font-weight: normal;
   }
+}
+
+.element-toolbar {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: #fff;
+  border: 1px solid #d8dbe0;
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  font-family: sans-serif;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: default;
+
+  button {
+    height: 26px;
+    min-width: 26px;
+    padding: 0 6px;
+    font-size: 12px;
+    line-height: 1;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #3c4b64;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: #e4e7ed;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    &.delete-btn {
+      color: #e55353;
+
+      &:hover {
+        background: #e55353;
+        color: #fff;
+      }
+    }
+  }
+
+  .toolbar-sep {
+    width: 1px;
+    height: 18px;
+    background: #d8dbe0;
+    margin: 0 2px;
+  }
+}
+
+.ticket-media {
+  display: flex;
+  padding: 2px 0;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+  }
+}
+
+.media-error {
+  font-family: sans-serif;
+  font-size: 11px;
+  color: #e55353;
+  border: 1px dashed #e55353;
+  padding: 2px 6px;
+}
+
+.inline-editor {
+  display: block;
+  width: 100%;
+  font: inherit;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: var(--cui-body-bg);
+  color: inherit;
 }

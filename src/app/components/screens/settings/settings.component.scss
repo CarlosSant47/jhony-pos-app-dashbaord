@@ -1,0 +1,39 @@
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.avatar-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+
+  img {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: var(--cui-secondary-bg);
+  }
+
+  span {
+    font-size: 12px;
+    color: var(--cui-secondary-color);
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &.active {
+    border-color: var(--cui-primary);
+  }
+}

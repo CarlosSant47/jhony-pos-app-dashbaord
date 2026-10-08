@@ -31,7 +31,6 @@ import { MainHeaderLayoutComponent } from './header/main.header-layout.component
     SidebarToggleDirective,
     SidebarTogglerDirective,
     ContainerComponent,
-    IconDirective,
     NgScrollbar,
     NgScrollHoverVisibility,
     RouterOutlet,
@@ -49,7 +48,7 @@ export class MainLayoutComponent implements OnInit {
       {
         name: 'Dashboard',
         url: '/dashboard',
-        icon: 'icon-speedometer'
+        icon: 'nav-icon-bullet'
       },
 
       {
@@ -59,17 +58,17 @@ export class MainLayoutComponent implements OnInit {
       {
         name: 'Parameters',
         url: '/parameters',
-        icon: 'icon-settings'
+        icon: 'nav-icon-bullet'
       },
       {
         name: "Tickets Editor",
         url: '/tickets-editor',
-        icon: 'icon-pencil'
+        icon: 'nav-icon-bullet'
       },
       {
         name: 'Simulator Application',
         url: '/simulator',
-        icon: 'icon-calculator'
+        icon: 'nav-icon-bullet'
       },
 
       {
@@ -89,6 +88,7 @@ export class MainLayoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadNavItems();
   }
+
 
 
 }

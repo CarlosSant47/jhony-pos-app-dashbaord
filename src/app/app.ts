@@ -6,12 +6,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IconSetService } from '@coreui/icons-angular';
 import { Title } from '@angular/platform-browser';
 import { delay, filter, map, tap } from 'rxjs';
+import { LoadingOverlayComponent } from './components/shared/loading-overlay/loading-overlay.component';
 import { iconSubset } from './utils/icons-subset';
 
 @Component({
   selector: 'app-root',
-  template: '<router-outlet />',
-  imports: [RouterOutlet]
+  template: '<router-outlet /><app-loading-overlay />',
+  imports: [RouterOutlet, LoadingOverlayComponent]
 })
 export class App implements OnInit {
 

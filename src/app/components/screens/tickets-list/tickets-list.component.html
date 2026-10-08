@@ -1,0 +1,106 @@
+<c-row>
+  <c-col xs="12">
+    <c-card class="mb-4">
+      <c-card-header class="d-flex align-items-center flex-wrap gap-2">
+        <strong>Tickets</strong>
+        <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+          <input cFormControl class="search-box" type="search" placeholder="Buscar por nombre o descripción"
+            aria-label="Buscar tickets" (input)="onSearch($any($event.target).value)" />
+        </div>
+        <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+                    <button cButton color="primary" type="button" (click)="openNew()">+</button>
+
+        </div>
+      </c-card-header>
+      <c-card-body>
+        <app-data-table [columns]="columns" [actions]="actions" [page]="page()" [loading]="loading()"
+          [error]="error()" [sort]="sort()" [pageSizes]="pageSizes" emptyMessage="No hay tickets que mostrar."
+          [rowKey]="rowKey" (pageChange)="goTo($event)" (pageSizeChange)="changeSize($event)"
+          (sortChange)="changeSort($event)" (retry)="load()" />
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- Editor modal: not dismissible by backdrop or Esc -->
+<c-modal [visible]="editorVisible()" backdrop="static" [keyboard]="false" fullscreen="xl" size="xl" scrollable
+  alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>{{ editingId() === null ? 'Nuevo ticket' : 'Editar ticket' }}</h5>
+    <button cButtonClose type="button" (click)="requestClose()"></button>
+  </c-modal-header>
+  <c-modal-body class="editor-body">
+    @if (editorVisible()) {
+    <c-card class="mb-4">
+      <c-card-header><strong>Datos del ticket</strong></c-card-header>
+      <c-card-body>
+        <form cForm [formGroup]="metaForm">
+          <c-row>
+            <c-col md="5" class="mb-3">
+              <label cLabel for="ticketName">Nombre</label>
+              <input cFormControl id="ticketName" type="text" formControlName="name" maxlength="100"
+                [valid]="metaForm.controls.name.invalid && (metaForm.controls.name.touched || submitted()) ? false : undefined" />
+              @if (metaForm.controls.name.invalid && (metaForm.controls.name.touched || submitted())) {
+              <div class="text-danger small mt-1">El nombre es obligatorio.</div>
+              }
+            </c-col>
+            <c-col md="5" class="mb-3">
+              <label cLabel for="ticketDescription">Descripción</label>
+              <input cFormControl id="ticketDescription" type="text" formControlName="description" maxlength="255" />
+            </c-col>
+            <c-col md="2" class="mb-3 d-flex align-items-end">
+              <c-form-check switch>
+                <input cFormCheckInput id="ticketActive" type="checkbox" formControlName="active" />
+                <label cFormCheckLabel for="ticketActive">Activo</label>
+              </c-form-check>
+            </c-col>
+          </c-row>
+        </form>
+      </c-card-body>
+    </c-card>
+
+    <app-tickets-editor [template]="editorTemplate()" />
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    @if (saveError()) {
+    <span class="text-danger me-auto">{{ saveError() }}</span>
+    }
+    <button cButton color="secondary" variant="outline" type="button" [disabled]="saving()"
+      (click)="requestClose()">Cancelar</button>
+    <button cButton color="primary" type="button" [disabled]="saving()" (click)="save()">
+      @if (saving()) {
+      <c-spinner size="sm" aria-hidden="true" />
+      }
+      Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Unsaved changes confirmation -->
+<c-modal [visible]="confirmCloseVisible()" backdrop="static" [keyboard]="false" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Cambios sin guardar</h5>
+  </c-modal-header>
+  <c-modal-body>Hay cambios sin guardar en este ticket. ¿Qué deseas hacer?</c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" variant="outline" type="button" (click)="resolveClose('keep')">Seguir editando</button>
+    <button cButton color="danger" variant="outline" type="button" (click)="resolveClose('discard')">Deshacer cambios</button>
+    <button cButton color="primary" type="button" (click)="resolveClose('save')">Guardar</button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Delete confirmation -->
+<c-modal [visible]="!!deleteTarget()" backdrop="static" [keyboard]="false" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Eliminar ticket</h5>
+  </c-modal-header>
+  <c-modal-body>
+    ¿Seguro que deseas eliminar <strong>{{ deleteTarget()?.name }}</strong>? Esta acción no se puede deshacer.
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" variant="outline" type="button" [disabled]="deleting()"
+      (click)="cancelDelete()">Cancelar</button>
+    <button cButton color="danger" type="button" [disabled]="deleting()" (click)="delete()">Eliminar</button>
+  </c-modal-footer>
+</c-modal>

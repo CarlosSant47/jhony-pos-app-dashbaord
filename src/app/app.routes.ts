@@ -8,6 +8,11 @@ export const routes: Routes = [
         pathMatch: 'full'
     },
     {
+        path: 'login',
+        loadComponent: () => import('./components/screens/login/login.component').then(m => m.LoginComponent),
+        data: { title: 'Login' }
+    },
+    {
         path: '', loadComponent: () => import('./components/main/main-layout.component').then(m => m.MainLayoutComponent),
         data: { title: 'Home' },
         children: [
@@ -18,8 +23,13 @@ export const routes: Routes = [
             },
             {
                 path: 'tickets-editor',
-                loadComponent: () => import('./components/screens/tickets-editor/tickets-editor.component').then(m => m.TicketsEditorComponent),
-                data: { title: 'Tickets Editor' }
+                loadComponent: () => import('./components/screens/tickets-list/tickets-list.component').then(m => m.TicketsListComponent),
+                data: { title: 'Tickets' }
+            },
+            {
+                path: 'settings',
+                loadComponent: () => import('./components/screens/settings/settings.component').then(m => m.SettingsComponent),
+                data: { title: 'Settings' }
             }
         ]
     },

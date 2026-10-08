@@ -1,0 +1,89 @@
+<c-row>
+  <c-col xs="12" lg="8" xl="6">
+    <c-card class="mb-4">
+      <c-card-body class="d-flex align-items-center gap-4 flex-wrap">
+        <img [src]="avatar()" class="avatar-option" alt="Foto de perfil" loading="lazy" decoding="async"  width="96" height="96"/>
+        <div class="flex-grow-1">
+          <h4 class="mb-1">{{ user.name }}</h4>
+          <span class="text-body-secondary">{{ user.profileType }}</span>
+          <div class="mt-3 d-flex gap-2 flex-wrap">
+            <button cButton color="primary" size="sm" type="button" (click)="openAvatarModal()">Cambiar foto</button>
+            <button cButton color="secondary" variant="outline" size="sm" type="button" (click)="removeAvatar()">
+              Restablecer
+            </button>
+          </div>
+          @if (avatarError()) {
+          <div class="text-danger small mt-2">{{ avatarError() }}</div>
+          }
+        </div>
+      </c-card-body>
+    </c-card>
+
+    <c-card class="mb-4">
+      <c-card-header><strong>Opciones generales</strong></c-card-header>
+      <div cListGroup flush>
+        <button cListGroupItem type="button" class="d-flex justify-content-between align-items-center"
+          (click)="aboutVisible = true">
+          Acerca de
+          <span class="text-body-secondary">›</span>
+        </button>
+      </div>
+    </c-card>
+  </c-col>
+</c-row>
+
+<c-modal [visible]="aboutVisible" (visibleChange)="aboutVisible = $event" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Acerca de</h5>
+    <button cButtonClose type="button" (click)="aboutVisible = false"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <p class="mb-1"><strong>{{ appInfo.name }}</strong></p>
+    <p class="text-body-secondary mb-0">Versión {{ appInfo.version }}</p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" variant="outline" type="button" (click)="aboutVisible = false">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="avatarModalVisible" (visibleChange)="avatarModalVisible = $event" alignment="center" size="lg"
+  scrollable>
+  <c-modal-header>
+    <h5 cModalTitle>Elige tu avatar</h5>
+    <button cButtonClose type="button" (click)="avatarModalVisible = false"></button>
+  </c-modal-header>
+  <c-modal-body>
+    @if (avatarModalVisible) {
+    @if (avatarsError()) {
+    <p class="text-danger">{{ avatarsError() }}
+      <button cButton color="danger" variant="outline" size="sm" type="button" class="ms-2"
+        (click)="loadAvatars()">Reintentar</button></p>
+    } @else if (avatarsLoading()) {
+    <p class="text-body-secondary mb-0">Cargando avatares...</p>
+    } @else if (avatars().length === 0) {
+    <p class="text-body-secondary mb-0">Aún no hay avatares disponibles.</p>
+    } @else {
+    <div class="avatar-grid">
+      @for (a of avatars(); track a.id) {
+      <button type="button" class="avatar-option" [class.active]="a.url === avatar()" (click)="selectAvatar(a)">
+        <img [src]="a.url" alt="Avatar" loading="lazy" decoding="async" width="88" height="88" />
+      </button>
+      }
+    </div>
+    }
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    @if (avatarUploadError()) {
+    <span class="text-danger small me-auto">{{ avatarUploadError() }}</span>
+    }
+    <button cButton color="primary" type="button" [disabled]="uploading()" (click)="avatarInput.click()">
+      {{ uploading() ? 'Subiendo...' : 'Subir avatar' }}
+    </button>
+    <button cButton color="warning" variant="outline" type="button" (click)="avatarModalVisible = false">
+     Cerrar
+    </button>
+    <input #avatarInput type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none"
+      (change)="onAvatarSelected($event)" />
+  </c-modal-footer>
+</c-modal>

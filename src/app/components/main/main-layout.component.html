@@ -3,9 +3,11 @@
   visible>
   <c-sidebar-header class="border-bottom">
     <c-sidebar-brand [routerLink]="[]">
-
-      <img class="sidebar-brand-full" height="32" src="./assets/images/logo_simple.png" alt="CoreUI Logo">
-
+      <table>
+        <tr>
+          <img class="sidebar-brand-full" height="32" src="./assets/images/logo_simple.png" alt="">
+        </tr>
+      </table>
     </c-sidebar-brand>
   </c-sidebar-header>
 
@@ -14,7 +16,7 @@
   </ng-scrollbar>
 
   @if (!sidebar1.narrow) {
-  <c-sidebar-footer cSidebarToggle="sidebar1" class="border-top d-none d-lg-flex" toggle="unfoldable"  
+  <c-sidebar-footer cSidebarToggle="sidebar1" class="border-top d-none d-lg-flex" toggle="unfoldable"
     style="cursor: pointer;">
     <button cSidebarToggler aria-label="Toggle sidebar fold"></button>
   </c-sidebar-footer>

@@ -1,0 +1,15 @@
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sort-icon {
+  display: inline-block;
+  width: 1em;
+  font-size: 10px;
+}
+
+.page-size {
+  width: auto;
+}

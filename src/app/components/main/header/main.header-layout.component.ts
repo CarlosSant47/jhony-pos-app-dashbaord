@@ -55,7 +55,6 @@ import { IconDirective } from '@coreui/icons-angular';
     ModalComponent,
     ModalHeaderComponent,
     ModalTitleDirective,
-    NavLinkDirective,
     NgTemplateOutlet,
     RouterLink,
     SearchButtonComponent,
@@ -86,4 +85,5 @@ export class MainHeaderLayoutComponent extends HeaderComponent {
 
   readonly searchVisible = signal(false);
 
+  
 }

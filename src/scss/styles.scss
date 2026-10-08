@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+@use "variables" as brand;
 @use "@coreui/coreui/scss/coreui" as * with (
+  $primary: brand.$brand-primary,
   $enable-deprecation-messages: false
 );
 
@@ -8,3 +10,4 @@
 
 
 @use "_theme";
+@use "custom" as *;
