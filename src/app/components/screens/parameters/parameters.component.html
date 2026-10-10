@@ -1,0 +1,124 @@
+<c-row>
+  <c-col xs="12">
+    @if (!selectedApp()) {
+    <c-card class="mb-4">
+      <c-card-header><strong>Parámetros · Aplicaciones</strong></c-card-header>
+      <c-card-body>
+        <app-data-table [columns]="appColumns" [actions]="appActions" [page]="apps()" [loading]="appsLoading()"
+          [error]="appsError()" [sort]="appsSort()" [pageSizes]="pageSizes" [rowKey]="appKey"
+          emptyMessage="No hay aplicaciones registradas." (pageChange)="appsPage($event)"
+          (pageSizeChange)="appsSize($event)" (sortChange)="appsSortChange($event)" (retry)="loadApps()" />
+      </c-card-body>
+    </c-card>
+    } @else {
+    <c-card class="mb-4">
+      <c-card-header class="d-flex align-items-center flex-wrap gap-2">
+        <button cButton color="secondary" variant="outline" size="sm" type="button" (click)="backToApps()">
+          ← Aplicaciones
+        </button>
+        <strong>{{ selectedApp()!.key }}</strong>
+        <span class="text-body-secondary">{{ selectedApp()!.description }}</span>
+        <button cButton color="primary" size="sm" type="button" class="ms-auto" (click)="openForm(null)">
+          + Nuevo parámetro
+        </button>
+      </c-card-header>
+      <c-card-body>
+        <app-data-table [columns]="paramColumns" [actions]="paramActions" [page]="params()" [loading]="paramsLoading()"
+          [error]="paramsError()" [sort]="paramsSort()" [pageSizes]="pageSizes" [rowKey]="paramKey"
+          emptyMessage="Esta aplicación no tiene parámetros." (pageChange)="paramsPage($event)"
+          (pageSizeChange)="paramsSize($event)" (sortChange)="paramsSortChange($event)" (retry)="loadParams()" />
+      </c-card-body>
+    </c-card>
+    }
+  </c-col>
+</c-row>
+
+<c-modal [visible]="formVisible()" backdrop="static" [keyboard]="false" alignment="center" size="lg" scrollable>
+  <c-modal-header>
+    <h5 cModalTitle>{{ editing() ? 'Editar parámetro' : 'Nuevo parámetro' }}</h5>
+    <button cButtonClose type="button" (click)="closeForm()"></button>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="form" (ngSubmit)="save()" id="param-form">
+      <div class="mb-3">
+        <label cLabel for="p-type">Tipo de dato</label>
+        <select cSelect id="p-type" formControlName="dataTypeId"
+          [class.is-invalid]="form.controls.dataTypeId.touched && form.controls.dataTypeId.invalid">
+          <option value="" disabled>Selecciona un tipo</option>
+          @for (t of dataTypes(); track t.id) {
+          <option [value]="t.id">{{ typeLabel(t) }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label cLabel for="p-key">Clave</label>
+        <input cFormControl id="p-key" formControlName="key" placeholder="ej. get-location-on-sales"
+          [class.is-invalid]="form.controls.key.touched && form.controls.key.invalid" />
+      </div>
+      <div class="mb-1">
+        <label cLabel for="p-desc">Descripción</label>
+        <input cFormControl id="p-desc" formControlName="description" />
+      </div>
+      <div class="mb-3">
+        <label cLabel>Valor</label>
+        @switch (currentType) {
+        @case ('JSON') {
+        <app-json-editor formControlName="value"
+          [invalid]="form.controls.value.touched && form.controls.value.invalid" />
+        <div class="mt-2">
+          <button cButton color="secondary" variant="outline" size="sm" type="button" (click)="prettyValue()">
+            Formatear JSON
+          </button>
+          <small class="text-body-secondary ms-2">Se envía minificado al guardar.</small>
+        </div>
+        }
+        @case ('BOOLEAN') {
+        <select cSelect formControlName="value"
+          [class.is-invalid]="form.controls.value.touched && form.controls.value.invalid">
+          <option value="true">true</option>
+          <option value="false">false</option>
+        </select>
+        }
+        @case ('') {
+        <input cFormControl formControlName="value" [readonly]="true" placeholder="Primero elige el tipo de dato" />
+        }
+        @default {
+        <input cFormControl formControlName="value"
+          [attr.inputmode]="currentType === 'INTEGER' ? 'numeric' : currentType === 'FLOAT' ? 'decimal' : 'text'"
+          [class.is-invalid]="form.controls.value.touched && form.controls.value.invalid" />
+        }
+        }
+        @if (form.controls.value.touched && form.controls.value.invalid) {
+        <div class="invalid-feedback d-block">{{ errorMessage() }}</div>
+        }
+      </div>
+
+
+    </form>
+    @if (saveError()) {
+    <div class="text-danger small mt-2">{{ saveError() }}</div>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" variant="outline" type="button" [disabled]="saving()"
+      (click)="closeForm()">Cancelar</button>
+    <button cButton color="primary" type="submit" form="param-form" [disabled]="saving()">
+      @if (saving()) {<c-spinner size="sm" />} Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<c-modal [visible]="!!deleteTarget()" alignment="center" backdrop="static" [keyboard]="false">
+  <c-modal-header>
+    <h5 cModalTitle>Eliminar parámetro</h5>
+  </c-modal-header>
+  <c-modal-body>
+    ¿Eliminar el parámetro <strong>{{ deleteTarget()?.key }}</strong>? Esta acción no se puede deshacer.
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" variant="outline" type="button" [disabled]="deleting()"
+      (click)="deleteTarget.set(null)">Cancelar</button>
+    <button cButton color="danger" type="button" [disabled]="deleting()" (click)="confirmDelete()">Eliminar</button>
+  </c-modal-footer>
+</c-modal>

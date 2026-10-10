@@ -66,6 +66,11 @@ export class MainLayoutComponent implements OnInit {
         icon: 'nav-icon-bullet'
       },
       {
+        name: 'Route Tracking',
+        url: '/route-tracking',
+        icon: 'nav-icon-bullet'
+      },
+      {
         name: 'Simulator Application',
         url: '/simulator',
         icon: 'nav-icon-bullet'

@@ -1,0 +1,65 @@
+<div class="row g-3">
+  <div class="col-12 col-lg-4 col-xl-3">
+    <c-card>
+      <c-card-header>
+        <strong>Rutas aperturadas</strong>
+      </c-card-header>
+      <c-card-body>
+        <label class="form-label" for="rt-date">Fecha</label>
+        <input id="rt-date" type="date" class="form-control mb-3" [ngModel]="date()" (ngModelChange)="onDateChange($event)" />
+
+        @if (error()) {
+          <div class="alert alert-danger py-2 small">{{ error() }}</div>
+        }
+
+        @if (loadingList()) {
+          <div class="text-center py-3"><c-spinner size="sm" /></div>
+        } @else if (!openings().length) {
+          <div class="text-body-secondary small">No hay rutas aperturadas en esta fecha.</div>
+        } @else {
+          <div class="list-group openings-list">
+            @for (o of openings(); track o.id) {
+              <button type="button" class="list-group-item list-group-item-action" [class.active]="selected()?.id === o.id" (click)="select(o)">
+                <div class="d-flex justify-content-between align-items-start">
+                  <strong>{{ o.routeName }}</strong>
+                  <span class="badge" [class.bg-success]="!o.finished" [class.bg-secondary]="o.finished">
+                    {{ o.finished ? 'Finalizada' : 'En curso' }}
+                  </span>
+                </div>
+                <div class="small">{{ o.employeeName }}</div>
+                <div class="small opacity-75">{{ o.salesPointName }}</div>
+                <div class="small opacity-75">
+                  {{ o.openedAt | date: 'shortTime' }}
+                  @if (o.closedAt) { – {{ o.closedAt | date: 'shortTime' }} }
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </c-card-body>
+    </c-card>
+  </div>
+
+  <div class="col-12 col-lg-8 col-xl-9">
+    <c-card>
+      <c-card-header class="d-flex justify-content-between align-items-center">
+        <strong>
+          @if (selected(); as s) { {{ s.routeName }} · {{ s.employeeName }} } @else { Selecciona una ruta }
+        </strong>
+        <span class="small text-body-secondary">{{ selected()?.finished ? 'Finalizada' : 'En curso' }}</span>
+        <div class="d-flex align-items-center gap-2">
+          @if (selected()) {
+            <span class="small text-body-secondary">{{ points().length }} puntos</span>
+          }
+          <button cButton color="primary" size="sm" type="button" [disabled]="!selected() || loadingPoints()" (click)="refresh()">
+            @if (loadingPoints()) { <c-spinner size="sm" class="me-1" /> }
+            Actualizar
+          </button>
+        </div>
+      </c-card-header>
+      <c-card-body class="p-0">
+        <div #mapContainer class="map"></div>
+      </c-card-body>
+    </c-card>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+.json-editor {
+  border: 1px solid var(--cui-border-color);
+  border-radius: var(--cui-border-radius);
+  overflow: hidden;
+
+  &.is-invalid {
+    border-color: var(--cui-danger);
+  }
+}
+
+:host ::ng-deep .json-editor .cm-editor {
+  min-height: var(--editor-min-height, 180px);
+  max-height: 360px;
+  background: var(--cui-body-bg);
+  color: var(--cui-body-color);
+  font-size: 13px;
+
+  &.cm-focused {
+    outline: 2px solid rgba(var(--cui-primary-rgb), 0.5);
+  }
+
+  .cm-gutters {
+    background: var(--cui-tertiary-bg);
+    color: var(--cui-secondary-color);
+    border-right: 1px solid var(--cui-border-color);
+  }
+
+  .cm-activeLine,
+  .cm-activeLineGutter {
+    background: rgba(var(--cui-primary-rgb), 0.06);
+  }
+}

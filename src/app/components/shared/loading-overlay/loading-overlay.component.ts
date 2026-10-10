@@ -10,6 +10,7 @@ import { LoadingService } from '../../../services/loading.service';
     @if (loading.loading()) {
       <div class="overlay" role="status" aria-live="polite" aria-label="Cargando">
         <c-spinner color="primary" />
+        <p class="loading-text">Loading...</p>
       </div>
     }
   `,
@@ -25,6 +26,11 @@ import { LoadingService } from '../../../services/loading.service';
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px); /* For better cross-browser support */
+    }
+    .loading-text {
+      margin-top: 1rem;
+      font-size: 1.25rem;
+      color: #000;
     }
   `
 })

@@ -27,6 +27,16 @@ export const routes: Routes = [
                 data: { title: 'Tickets' }
             },
             {
+                path: 'route-tracking',
+                loadComponent: () => import('./components/screens/route-tracking/route-tracking.component').then(m => m.RouteTrackingComponent),
+                data: { title: 'Route Tracking' }
+            },
+            {
+                path: 'parameters',
+                loadComponent: () => import('./components/screens/parameters/parameters.component').then(m => m.ParametersComponent),
+                data: { title: 'Parameters' }
+            },
+            {
                 path: 'settings',
                 loadComponent: () => import('./components/screens/settings/settings.component').then(m => m.SettingsComponent),
                 data: { title: 'Settings' }
