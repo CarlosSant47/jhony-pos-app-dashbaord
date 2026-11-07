@@ -78,6 +78,8 @@ export const SAMPLE_DATA: Record<string, unknown> = {
   category: 'Bebidas',
   brand: 'Coca-Cola',
   unit: 'PZA',
+  code: '0001',
+  import: 0,
   quantity: 3,
   unitPrice: 18,
   price: 54,

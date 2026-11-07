@@ -4,4 +4,7 @@
 
 .editor-body {
   background: var(--cui-tertiary-bg);
+  height: calc(100vh - 10rem);
+  min-height: 0;
+  overflow: hidden;
 }

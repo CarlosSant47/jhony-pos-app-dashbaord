@@ -36,6 +36,12 @@
             }
           </div>
         }
+        <div class="mb-3 mt-3">
+        
+          <button cButton color="primary" size="sm" type="button" (click)="refresh()" class="w-100">
+            Refrescar Rutas
+          </button>
+        </div>
       </c-card-body>
     </c-card>
   </div>
@@ -48,9 +54,9 @@
         </strong>
         <span class="small text-body-secondary">{{ selected()?.finished ? 'Finalizada' : 'En curso' }}</span>
         <div class="d-flex align-items-center gap-2">
-          @if (selected()) {
-            <span class="small text-body-secondary">{{ points().length }} puntos</span>
-          }
+
+          <span class="small text-body-secondary"> Nissan Altima SR (VHXXX1)</span>
+        
           <button cButton color="primary" size="sm" type="button" [disabled]="!selected() || loadingPoints()" (click)="refresh()">
             @if (loadingPoints()) { <c-spinner size="sm" class="me-1" /> }
             Actualizar

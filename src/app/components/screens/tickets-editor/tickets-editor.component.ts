@@ -158,10 +158,12 @@ export class TicketsEditorComponent implements OnInit {
   ticket: TicketTemplate = createDefaultTemplate();
   private initialSnapshot = '';
 
+  activeTab: 'data' | 'format' | 'insert' | 'settings' = 'data';
   selection: Selection | null = null;
   toolbarVisible = false;
   elementForm: FormGroup = this.buildElementForm();
   readonly maxColumns = 4;
+  readonly maxLineBreakColumns = 2;
   readonly paperPadding = 20;
   columnModalVisible = false;
   editingColumnIndex: number | null = null;
@@ -192,6 +194,18 @@ export class TicketsEditorComponent implements OnInit {
 
   get columns(): FormArray {
     return this.elementForm.get('columns') as FormArray;
+  }
+
+  get standardColumnCount(): number {
+    return this.columns.controls.filter(c => !c.value.allowLineBreak).length;
+  }
+
+  get lineBreakColumnCount(): number {
+    return this.columns.length - this.standardColumnCount;
+  }
+
+  get canAddColumn(): boolean {
+    return this.standardColumnCount < this.maxColumns || this.lineBreakColumnCount < this.maxLineBreakColumns;
   }
 
   get elementType(): TicketContentType {
@@ -225,7 +239,8 @@ export class TicketsEditorComponent implements OnInit {
       title: [c?.title ?? ''],
       position: [c?.position ?? ('LEFT' as TicketPosition)],
       maxChars: [c?.maxChars ?? 10],
-      dataType: [c?.dataType ?? ('TEXT' as TicketDataType)]
+      dataType: [c?.dataType ?? ('TEXT' as TicketDataType)],
+      allowLineBreak: [c?.allowLineBreak ?? false]  
     });
   }
 
@@ -441,10 +456,18 @@ export class TicketsEditorComponent implements OnInit {
   }
 
   openColumnModal(index: number | null = null): void {
-    if (index === null && this.columns.length >= this.maxColumns) return;
+    if (index === null && !this.canAddColumn) return;
     this.editingColumnIndex = index;
     const value = index === null ? this.buildColumn().getRawValue() : this.columns.at(index).getRawValue();
     this.columnForm.reset(value);
+    const others = this.columns.controls.filter((_, i) => i !== index);
+    const canStandard = others.filter(c => !c.value.allowLineBreak).length < this.maxColumns;
+    const canFull = others.filter(c => c.value.allowLineBreak).length < this.maxLineBreakColumns;
+    const lineBreak = this.columnForm.get('allowLineBreak')!;
+    if (!canStandard) lineBreak.setValue(true);
+    else if (!canFull) lineBreak.setValue(false);
+    if (canStandard && canFull) lineBreak.enable();
+    else lineBreak.disable();
     this.columnModalVisible = true;
   }
 
@@ -456,7 +479,7 @@ export class TicketsEditorComponent implements OnInit {
     const value = this.columnForm.getRawValue();
     value.maxChars = Number(value.maxChars);
     if (this.editingColumnIndex === null) {
-      if (this.columns.length < this.maxColumns) this.columns.push(this.buildColumn(value));
+      if (this.canAddColumn) this.columns.push(this.buildColumn(value));
     } else {
       this.columns.at(this.editingColumnIndex).patchValue(value);
     }
@@ -494,7 +517,7 @@ export class TicketsEditorComponent implements OnInit {
   /** Resolves variables and parses <b>, <i>, <u> tags into styled segments; tags take no width. */
   renderSegments(el: TicketElement, text?: string): TextSegment[] {
     if (el.typeContent !== 'TEXT') return [];
-    text ??= this.resolveVariables(el);
+    text ??= el.content;
     const limit = Math.min(el.maxChars, this.settings.maxChars);
     const segments: TextSegment[] = [];
     const style = { b: false, i: false, u: false };
@@ -552,7 +575,7 @@ export class TicketsEditorComponent implements OnInit {
   }
 
 
-  
+
 
 
   private createSvgURL(svg: string): SafeUrl {
@@ -619,12 +642,19 @@ export class TicketsEditorComponent implements OnInit {
 
   tableLines(el: TicketElement): string[] {
     if (el.typeContent !== 'TABLE') return [];
+    const full = el.columns.filter(c => c.allowLineBreak).slice(0, this.maxLineBreakColumns);
+    const cols = el.columns.filter(c => !c.allowLineBreak);
     const row = (get: (c: TicketColumn) => string) =>
-      el.columns.map(c => this.pad(get(c), c.maxChars, c.position)).join('');
+      cols.map(c => this.pad(get(c), c.maxChars, c.position)).join('');
     const rows = resolveSampleRows(el.field, el.columns.map(c => c.field));
-    return [
-      row(c => c.title),
-      ...rows.map((r, i) => row(c => this.formatValue(resolveSampleValue(c.field, r, i), c.dataType)))
-    ].map(l => this.pad(l, this.settings.maxChars, el.position));
+    const fullLine = (c: TicketColumn, r: Record<string, unknown>, i: number) =>
+      this.pad(this.formatValue(resolveSampleValue(c.field, r, i), c.dataType), this.settings.maxChars, c.position);
+    const lines = [row(c => c.title)];
+    rows.forEach((r, i) => {
+      if (full[0]) lines.push(fullLine(full[0], r, i));
+      lines.push(row(c => this.formatValue(resolveSampleValue(c.field, r, i), c.dataType)));
+      if (full[1]) lines.push(fullLine(full[1], r, i));
+    });
+    return lines.map(l => this.pad(l, this.settings.maxChars, el.position));
   }
 }

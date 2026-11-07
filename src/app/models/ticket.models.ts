@@ -13,6 +13,7 @@ export interface TicketColumn {
   position: TicketPosition;
   maxChars: number;
   dataType: TicketDataType;
+  allowLineBreak?: boolean;
 }
 
 export interface TicketTextElement {

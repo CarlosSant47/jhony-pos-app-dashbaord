@@ -90,6 +90,8 @@ export class RouteTrackingComponent implements OnInit, OnDestroy {
 
     select(opening: DayOpening): void {
         this.selected.set(opening);
+        this.points.set([]);
+        this.draw(true);
         this.loadPoints(true);
     }
 
@@ -119,28 +121,46 @@ export class RouteTrackingComponent implements OnInit, OnDestroy {
     private draw(fit = false): void {
         if (!this.map || !this.layer) return;
         this.layer.clearLayers();
+        const opening = this.selected();
+        if (!opening) return;
         const points = this.points();
-        if (!points.length) return;
 
-        const latLngs = points.map(p => L.latLng(p.latitude, p.longitude));
-        L.polyline(latLngs, { color: '#ae0204', weight: 4, opacity: 0.7 }).addTo(this.layer);
-        const finished = this.selected()?.finished ?? false;
+        const openingLocation = L.latLng(opening.latitude, opening.longitude);
+        const trackingLocations = points.map(p => L.latLng(p.latitude, p.longitude));
+        const latLngs = [openingLocation, ...trackingLocations];
+        if (latLngs.length > 1) {
+            L.polyline(latLngs, { color: '#ae0204', weight: 4, opacity: 0.7 }).addTo(this.layer);
+        }
 
+        const startIcon = L.divIcon({
+            className: '',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            html: '<div class="rt-marker" style="background:#198754;width:20px;height:20px">I</div>'
+        });
+        const startPopup = document.createElement('div');
+        const startTitle = document.createElement('strong');
+        startTitle.textContent = 'Inicio de ruta';
+        const startDetails = document.createElement('div');
+        startDetails.textContent = `${opening.routeName} · ${new Date(opening.openedAt).toLocaleString()}`;
+        startPopup.append(startTitle, startDetails);
+        L.marker(openingLocation, { icon: startIcon, zIndexOffset: 1000 })
+            .bindPopup(startPopup)
+            .addTo(this.layer);
+
+        const finished = opening.finished;
         points.forEach((p, i) => {
-            const isStart = i === 0;
             const isLast = i === points.length - 1;
             const isEnd = isLast && finished;
             const isCurrent = isLast && !finished;
-            const isEdge = isStart || isEnd || isCurrent;
+            const isEdge = isEnd || isCurrent;
             const txStyle = styleFor(p.transactionType);
             if (!isEdge && !txStyle) return;
-            const style = isStart
-                ? { color: '#198754', symbol: 'I' }
-                : isEnd
-                    ? { color: '#e55353', symbol: 'F' }
-                    : isCurrent
-                        ? { color: '#f9b115', symbol: '➤' }
-                        : txStyle!;
+            const style = isEnd
+                ? { color: '#e55353', symbol: 'F' }
+                : isCurrent
+                    ? { color: '#f9b115', symbol: '➤' }
+                    : txStyle!;
             const color = style.color;
             const size = 20;
             const rotation = isCurrent ? `transform:rotate(${p.bearing - 90}deg);` : '';
@@ -167,7 +187,7 @@ export class RouteTrackingComponent implements OnInit, OnDestroy {
                 row.append(b, document.createTextNode(v));
                 el.appendChild(row);
             });
-            L.marker(latLngs[i], { icon, zIndexOffset: isEdge ? 1000 : 500 }).bindPopup(el).addTo(this.layer!);
+            L.marker(trackingLocations[i], { icon, zIndexOffset: isEdge ? 1000 : 500 }).bindPopup(el).addTo(this.layer!);
         });
 
         if (fit) this.map.fitBounds(L.latLngBounds(latLngs), { padding: [40, 40], maxZoom: 17 });

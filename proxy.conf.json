@@ -1,6 +1,6 @@
 {
   "/api/admin": {
-    "target": "http://localhost:8081",
+    "target": "https://bk-jhony-pos-app-admin.backend.dev.foxheaven.org/",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",

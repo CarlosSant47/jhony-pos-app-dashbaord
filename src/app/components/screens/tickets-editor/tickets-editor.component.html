@@ -1,124 +1,152 @@
-<c-row>
-  <c-col xs="12" lg="7">
-    <c-card class="mb-4">
-      <c-card-header><strong>Configuración de vista previa</strong></c-card-header>
-      <c-card-body>
-        <form cForm [formGroup]="settingsForm">
-          <c-row>
-            <c-col md="4" class="mb-3">
-              <label cLabel for="dpi">DPI de la impresora</label>
-              <input cFormControl id="dpi" type="number" min="72" formControlName="dpi" />
-              <div cFormText>Resolución a emular (ej. 203 o 300).</div>
-            </c-col>
-            <c-col md="4" class="mb-3">
-              <label cLabel for="maxChars">Caracteres por línea</label>
-              <input cFormControl id="maxChars" type="number" min="1" formControlName="maxChars" />
-              <div cFormText>Máximo de caracteres del ticket.</div>
-            </c-col>
-            <c-col md="4" class="mb-3">
-              <label cLabel for="widthMm">Ancho del papel (mm)</label>
-              <input cFormControl id="widthMm" type="number" min="10" formControlName="widthMm" />
-              <div cFormText>Ej. 58 u 80 mm.</div>
-            </c-col>
-          </c-row>
+<div class="editor-layout">
+  <c-card class="mb-3 editor-ribbon">
+      <c-card-header class="pb-0 border-bottom-0">
+        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+          <li class="nav-item">
+            <button type="button" class="nav-link" role="tab" [class.active]="activeTab === 'data'"
+              (click)="activeTab = 'data'">Datos del ticket</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" role="tab" [class.active]="activeTab === 'format'"
+              (click)="activeTab = 'format'">Formato</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" role="tab" [class.active]="activeTab === 'insert'"
+              (click)="activeTab = 'insert'">Insertar</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" role="tab" [class.active]="activeTab === 'settings'"
+              (click)="activeTab = 'settings'">Vista previa</button>
+          </li>
+        </ul>
+      </c-card-header>
+      <c-card-body class="ribbon-body">
+        @if (activeTab === 'data') {
+        <ng-content />
+        } @else if (activeTab === 'insert') {
+        <div class="d-flex flex-column gap-2">
+          @for (s of sections; track s.value) {
+          <div class="d-flex align-items-center flex-wrap gap-2">
+            <span class="small fw-bold text-muted insert-section">{{ s.label }}</span>
+            <div class="vr"></div>
+            <button size="sm" cButton color="primary" variant="outline" type="button"
+              (click)="addElement(s.value, 'TEXT'); activeTab = 'format'">+ Texto</button>
+            <button size="sm" cButton color="primary" variant="outline" type="button"
+              (click)="addElement(s.value, 'TABLE'); activeTab = 'format'">+ Tabla</button>
+            <button size="sm" cButton color="primary" variant="outline" type="button"
+              (click)="addElement(s.value, 'BARCODE'); activeTab = 'format'">+ Código de barras</button>
+            <button size="sm" cButton color="primary" variant="outline" type="button"
+              (click)="addElement(s.value, 'QRCODE'); activeTab = 'format'">+ QR</button>
+            <button size="sm" cButton color="primary" variant="outline" type="button"
+              (click)="addElement(s.value, 'IMAGE'); activeTab = 'format'">+ Imagen</button>
+          </div>
+          }
+        </div>
+        } @else if (activeTab === 'settings') {
+        <form cForm [formGroup]="settingsForm" class="d-flex flex-wrap align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <label cLabel for="dpi" class="mb-0 small text-muted text-nowrap">DPI</label>
+            <input cFormControl id="dpi" type="number" min="72" formControlName="dpi" sizing="sm" style="width: 85px;" />
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <label cLabel for="maxChars" class="mb-0 small text-muted text-nowrap">Caracteres por línea</label>
+            <input cFormControl id="maxChars" type="number" min="1" formControlName="maxChars" sizing="sm"
+              style="width: 85px;" />
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <label cLabel for="widthMm" class="mb-0 small text-muted text-nowrap">Ancho del papel (mm)</label>
+            <input cFormControl id="widthMm" type="number" min="10" formControlName="widthMm" sizing="sm"
+              style="width: 85px;" />
+          </div>
+          <div class="vr"></div>
           <c-form-check switch>
             <input cFormCheckInput id="showGrid" type="checkbox" formControlName="showGrid" />
             <label cFormCheckLabel for="showGrid">Mostrar cuadrícula (1 cuadro = 1 carácter)</label>
           </c-form-check>
         </form>
-      </c-card-body>
-    </c-card>
-
-    <c-card class="mb-4">
-      <c-card-header><strong>Elemento seleccionado</strong></c-card-header>
-      <c-card-body>
-        @if (!selection) {
+        } @else if (!selection) {
         <p class="text-body-secondary mb-0">
-          Haz clic en un elemento de la vista previa para editarlo, o agrega uno nuevo.
+          Haz clic en un elemento del ticket para editarlo, o agrega uno desde la pestaña Insertar.
         </p>
         } @else {
         <form cForm [formGroup]="elementForm">
-          <c-row>
-            <c-col md="6" class="mb-3">
-              <label cLabel for="typeContent">Tipo de elemento</label>
-              <select cSelect id="typeContent" formControlName="typeContent" (change)="onTypeChange()">
+          <!-- BARRA DE HERRAMIENTAS TIPO OFFICE (RIBBON) -->
+          <div class="toolbar-ribbon mb-3  d-flex flex-wrap align-items-center gap-3">
+
+            <!-- GRUPO 1: Tipo de Elemento -->
+            <div class="d-flex align-items-center gap-2">
+              <label cLabel for="typeContent" class="mb-0 small fw-bold text-muted"
+                style="white-space: nowrap;">Tipo:</label>
+              <select cSelect id="typeContent" formControlName="typeContent" (change)="onTypeChange()" sizing="sm"
+                class="w-auto">
                 @for (t of elementTypes; track t.value) {
                 <option [value]="t.value">{{ t.label }}</option>
                 }
               </select>
-            </c-col>
-            <c-col md="6" class="mb-3">
-              <label cLabel>Alineación</label>
-              <c-button-group class="d-flex" role="group" aria-label="Alineación">
+            </div>
+
+            <!-- Separador Vertical -->
+            <div class="vr"></div>
+
+            <!-- GRUPO 2: Formato (Fuente) -->
+            @if (elementType === 'TEXT' || elementType === 'TABLE') {
+            <div class="d-flex align-items-center gap-1">
+              <c-button-group role="group" aria-label="Formato de texto">
+
+                <!-- Botón Negrita (Toda la línea) - Reemplaza tu checkbox para que luzca como botón de Word -->
+                <button cButton type="button" size="sm" title="Negrita (Línea completa)"
+                  [color]="elementForm.get('bold')?.value ? 'primary' : 'secondary'"
+                  [variant]="elementForm.get('bold')?.value ? undefined : 'outline'"
+                  (click)="elementForm.get('bold')?.setValue(!elementForm.get('bold')?.value)">
+                  <strong style="font-family: serif; font-size: 14px;">B</strong>
+                </button>
+
+                @if(elementType === 'TEXT') {
+                <!-- Botones de selección de texto -->
+
+                }
+              </c-button-group>
+            </div>
+
+            <!-- Separador Vertical -->
+            <div class="vr"></div>
+            }
+
+            <!-- GRUPO 3: Alineación (Párrafo) -->
+            <div class="d-flex align-items-center">
+              <c-button-group role="group" aria-label="Alineación">
                 @for (p of positions; track p.value) {
                 <button cButton type="button" size="sm" [title]="p.label"
                   [color]="elementForm.get('position')?.value === p.value ? 'primary' : 'secondary'"
                   [variant]="elementForm.get('position')?.value === p.value ? undefined : 'outline'"
                   (click)="elementForm.get('position')?.setValue(p.value)">
-                  <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true" class="mt-1">
                     @switch (p.value) {
                     @case ('LEFT') {
                     <rect x="0" y="1" width="18" height="2" />
                     <rect x="0" y="6" width="10" height="2" />
-                    <rect x="0" y="11" width="14" height="2" /> }
+                    <rect x="0" y="11" width="14" height="2" />
+                    }
                     @case ('CENTER') {
                     <rect x="0" y="1" width="18" height="2" />
                     <rect x="4" y="6" width="10" height="2" />
-                    <rect x="2" y="11" width="14" height="2" /> }
+                    <rect x="2" y="11" width="14" height="2" />
+                    }
                     @default {
                     <rect x="0" y="1" width="18" height="2" />
                     <rect x="8" y="6" width="10" height="2" />
-                    <rect x="4" y="11" width="14" height="2" /> }
+                    <rect x="4" y="11" width="14" height="2" />
+                    }
                     }
                   </svg>
-                  <span class="ms-1 d-none d-xl-inline">{{ p.label }}</span>
                 </button>
                 }
               </c-button-group>
-            </c-col>
-          </c-row>
+            </div>
 
- @if (elementType === 'TEXT' || elementType === 'TABLE') {
-          <c-form-check class="mb-3">
-            <input cFormCheckInput id="bold" type="checkbox" formControlName="bold" />
-            <label cFormCheckLabel for="bold">Negritas</label>
-          </c-form-check>
-          }
-
-          @if (elementType === 'TEXT') {
-          <div class="mb-3">
-            <label cLabel for="content">Contenido</label>
-            <div class="d-flex gap-1 mb-1">
-              <button cButton color="secondary" variant="outline" size="sm" type="button" title="Negrita (&lt;b&gt;)" (click)="wrapSelection(contentInput, 'b')"><b>B</b></button>
-              <button cButton color="secondary" variant="outline" size="sm" type="button" title="Cursiva (&lt;i&gt;)" (click)="wrapSelection(contentInput, 'i')"><i>I</i></button>
-              <button cButton color="secondary" variant="outline" size="sm" type="button" title="Subrayado (&lt;u&gt;)" (click)="wrapSelection(contentInput, 'u')"><u>U</u></button>
-            </div>
-            <input #contentInput cFormControl id="content" type="text" formControlName="content" (input)="onContentInput()" />
-            <div cFormText>
-              Estilos: selecciona texto y usa B / I / U, o escribe &lt;b&gt;, &lt;i&gt;, &lt;u&gt;. Para códigos o imágenes agrega un elemento de ese tipo. Usa variables entre llaves, ej. {{ '{customerName}' }}, {{ '{rfc}' }}, {{ '{grandTotal}' }}. Haz clic en
-              una para insertarla:
-            </div>
-            <div class="variable-list mt-2">
-              @for (v of variables; track v) {
-              <button type="button" class="badge text-bg-light border" (click)="insertVariable(v)">{{ v }}</button>
-              }
-            </div>
           </div>
-          <c-row>
-            <c-col md="6" class="mb-3">
-              <label cLabel for="elMaxChars">Máx. caracteres</label>
-              <input cFormControl id="elMaxChars" type="number" min="1" formControlName="maxChars" />
-            </c-col>
-            <c-col md="6" class="mb-3">
-              <label cLabel for="dataType">Tipo de dato</label>
-              <select cSelect id="dataType" formControlName="dataType">
-                @for (d of dataTypes; track d.value) {
-                <option [value]="d.value">{{ d.label }}</option>
-                }
-              </select>
-            </c-col>
-          </c-row>
-          } @else if (elementType === 'TABLE') {
+
+          @if (elementType === 'TABLE') {
           <div class="mb-3">
             <label cLabel for="field">Campo de datos (lista)</label>
             <input cFormControl id="field" type="text" formControlName="field" />
@@ -127,9 +155,9 @@
           </div>
 
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0">Columnas ({{ columns.length }}/{{ maxColumns }})</h6>
+            <h6 class="mb-0">Columnas ({{ standardColumnCount }}/{{ maxColumns }}) · Ancho completo ({{ lineBreakColumnCount }}/{{ maxLineBreakColumns }})</h6>
             <button cButton color="primary" variant="outline" size="sm" type="button"
-              [disabled]="columns.length >= maxColumns" (click)="openColumnModal()">
+              [disabled]="!canAddColumn" (click)="openColumnModal()">
               + Agregar columna
             </button>
           </div>
@@ -158,67 +186,66 @@
             </tbody>
           </table>
           }
-          } @else {
-          <div class="mb-3">
-            <label cLabel for="mediaContent">{{ elementType === 'IMAGE' ? 'URL o data:image de la imagen' : 'Valor' }}</label>
-            <input cFormControl id="mediaContent" type="text" formControlName="content" />
-            <div cFormText>Puedes usar variables entre llaves, ej. {{ '{barcode}' }}, {{ '{uuid}' }}.</div>
-          </div>
-          @if (elementType === 'BARCODE') {
-          <c-row>
-            <c-col md="4" class="mb-3">
-              <label cLabel for="barcodeType">Tipo</label>
-              <select cSelect id="barcodeType" formControlName="barcodeType">
-                @for (b of barcodeTypes; track b.value) {
-                <option [value]="b.value">{{ b.label }}</option>
-                }
-              </select>
-            </c-col>
-            <c-col md="4" class="mb-3">
-              <label cLabel for="barcodeHeight">Alto (mm)</label>
-              <input cFormControl id="barcodeHeight" type="number" min="3" formControlName="height" />
-            </c-col>
-            <c-col md="4" class="mb-3">
-              <label cLabel for="textPosition">Texto</label>
-              <select cSelect id="textPosition" formControlName="textPosition">
-                @for (p of barcodeTextPositions; track p.value) {
-                <option [value]="p.value">{{ p.label }}</option>
-                }
-              </select>
-            </c-col>
-          </c-row>
-          } @else {
-          <div class="mb-3">
-            <label cLabel for="mediaSize">{{ elementType === 'QRCODE' ? 'Tamaño (mm)' : 'Ancho (mm, 0 = tamaño original)' }}</label>
-            <input cFormControl id="mediaSize" type="number" min="0" formControlName="size" />
-          </div>
-          }
+          } @else if (elementType !== 'TEXT') {
+              <div class="mb-3">
+                <label cLabel for="mediaContent">{{ elementType === 'IMAGE' ? 'URL o data:image de la imagen' : 'Valor'
+                  }}</label>
+                <input cFormControl id="mediaContent" type="text" formControlName="content" />
+                <div cFormText>Puedes usar variables entre llaves, ej. {{ '{barcode}' }}, {{ '{uuid}' }}.</div>
+              </div>
+              @if (elementType === 'BARCODE') {
+              <c-row>
+                <c-col md="4" class="mb-3">
+                  <label cLabel for="barcodeType">Tipo</label>
+                  <select cSelect id="barcodeType" formControlName="barcodeType">
+                    @for (b of barcodeTypes; track b.value) {
+                    <option [value]="b.value">{{ b.label }}</option>
+                    }
+                  </select>
+                </c-col>
+                <c-col md="4" class="mb-3">
+                  <label cLabel for="barcodeHeight">Alto (mm)</label>
+                  <input cFormControl id="barcodeHeight" type="number" min="3" formControlName="height" />
+                </c-col>
+                <c-col md="4" class="mb-3">
+                  <label cLabel for="textPosition">Texto</label>
+                  <select cSelect id="textPosition" formControlName="textPosition">
+                    @for (p of barcodeTextPositions; track p.value) {
+                    <option [value]="p.value">{{ p.label }}</option>
+                    }
+                  </select>
+                </c-col>
+              </c-row>
+              } @else {
+              <div class="mb-3">
+                <label cLabel for="mediaSize">{{ elementType === 'QRCODE' ? 'Tamaño (mm)' : 'Ancho (mm, 0 = tamañoriginal)'
+                  }}</label>
+                <input cFormControl id="mediaSize" type="number" min="0" formControlName="size" />
+              </div>
+            }
           }
 
           <hr />
           <div class="d-flex gap-2 flex-wrap">
-            <button cButton color="secondary" variant="outline" type="button" (click)="moveElement(-1)">↑ Subir</button>
-            <button cButton color="secondary" variant="outline" type="button" (click)="moveElement(1)">↓ Bajar</button>
-            <button cButton color="danger" type="button" (click)="removeElement()">Eliminar elemento</button>
+            <button cButton color="secondary" size="sm" variant="outline" type="button" (click)="moveElement(-1)">↑ Subir</button>
+            <button cButton color="secondary" size="sm" variant="outline" type="button" (click)="moveElement(1)">↓ Bajar</button>
+            <button cButton color="danger" size="sm" type="button" (click)="removeElement()">Eliminar elemento</button>
           </div>
         </form>
         }
       </c-card-body>
     </c-card>
 
-    
-  </c-col>
-
-  <c-col xs="12" lg="5">
-    <c-card class="mb-4">
+    <c-card class="preview-card">
       <c-card-header class="d-flex align-items-center flex-wrap gap-2">
         <div>
-          <strong>Vista previa</strong>
+          <strong>Ticket</strong>
           <small class="text-body-secondary ms-2">{{ settings.widthMm }} mm · {{ settings.dpi }} dpi · {{
             settings.maxChars }} car.</small>
         </div>
       </c-card-header>
       <c-card-body class="preview-wrapper">
+
         <div class="ticket-paper" [class.show-grid]="settings.showGrid" [style.width.px]="widthPx + paperPadding * 2"
           [style.padding-left.px]="paperPadding" [style.padding-right.px]="paperPadding"
           [style.font-size.px]="fontSizePx">
@@ -228,9 +255,10 @@
             @for (el of ticket[s.value]; track $index; let i = $index) {
             <div class="ticket-el" [class.selected]="isSelected(s.value, i)"
               [style.font-weight]="'bold' in el && el.bold ? 'bold' : 'normal'"
-              [class.drag-over]="dragOver?.section === s.value && dragOver?.index === i" [draggable]="!isEditing(s.value, i)"
-              (click)="select(s.value, i)" (dblclick)="startInlineEdit(s.value, i)" (dragstart)="onDragStart($event, s.value, i)"
-              (dragover)="onDragOver($event, s.value, i)" (drop)="onDrop($event, s.value, i)" (dragend)="onDragEnd()">
+              [class.drag-over]="dragOver?.section === s.value && dragOver?.index === i"
+              [draggable]="!isEditing(s.value, i)" (click)="select(s.value, i)" (dblclick)="startInlineEdit(s.value, i)"
+              (dragstart)="onDragStart($event, s.value, i)" (dragover)="onDragOver($event, s.value, i)"
+              (drop)="onDrop($event, s.value, i)" (dragend)="onDragEnd()">
               @if (isSelected(s.value, i) && toolbarVisible && !isDragging) {
               <div class="element-toolbar" (click)="$event.stopPropagation()" draggable="false">
                 <button type="button" title="Subir" [disabled]="i === 0" (click)="moveElement(-1)">▲</button>
@@ -247,9 +275,11 @@
                 (keydown.escape)="cancelInlineEdit(); $event.stopPropagation()"
                 (blur)="commitInlineEdit(inlineInput.value)" />
               } @else if (el.typeContent === 'TEXT') {
-              <div class="ticket-line">@for (seg of renderSegments(el); track $index) {<span [class.fw-bold]="seg.b" [class.fst-italic]="seg.i" [class.text-decoration-underline]="seg.u">{{ seg.text }}</span>}</div>
+              <div class="ticket-line">@for (seg of renderSegments(el); track $index) {<span [class.fw-bold]="seg.b"
+                  [class.fst-italic]="seg.i" [class.text-decoration-underline]="seg.u">{{ seg.text }}</span>}</div>
               } @else if (renderMedia(el); as media) {
-              <div class="ticket-media" [style.justify-content]="el.position === 'LEFT' ? 'flex-start' : el.position === 'RIGHT' ? 'flex-end' : 'center'">
+              <div class="ticket-media"
+                [style.justify-content]="el.position === 'LEFT' ? 'flex-start' : el.position === 'RIGHT' ? 'flex-end' : 'center'">
                 @if (media.src) {
                 <img [src]="media.src" [alt]="media.tag" [style.width.px]="media.widthPx" />
                 } @else {
@@ -268,30 +298,7 @@
         </div>
       </c-card-body>
     </c-card>
-    <c-card class="mb-4">
-      <c-card-header><strong>Agregar elementos</strong></c-card-header>
-      <c-card-body class="d-flex gap-2 flex-wrap">
-        @for (s of sections; track s.value) {
-        <button size="sm" cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'TEXT')">
-          + Texto en {{ s.label }}
-        </button>
-        <button size="sm" cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'TABLE')">
-          + Tabla en {{ s.label }}
-        </button>
-        <button size="sm" cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'BARCODE')">
-          + Código de barras en {{ s.label }}
-        </button>
-        <button size="sm" cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'QRCODE')">
-          + QR en {{ s.label }}
-        </button>
-        <button size="sm" cButton color="primary" variant="outline" type="button" (click)="addElement(s.value, 'IMAGE')">
-          + Imagen en {{ s.label }}
-        </button>
-        }
-      </c-card-body>
-    </c-card>
-  </c-col>
-</c-row>
+</div>
 
 <c-modal [visible]="columnModalVisible" (visibleChange)="columnModalVisible = $event" backdrop="static"
   alignment="center">
@@ -312,7 +319,7 @@
         <div cFormText>Dato de cada fila, ej. productName, quantity, price.</div>
       </div>
       <c-row>
-        <c-col md="4" class="mb-3">
+        <c-col md="2" class="mb-3">
           <label cLabel>Alineación</label>
           <c-button-group class="d-flex" role="group" aria-label="Alineación">
             @for (p of positions; track p.value) {
@@ -354,6 +361,11 @@
           </select>
         </c-col>
       </c-row>
+      <c-form-check switch>
+        <input cFormCheckInput id="colLineBreak" type="checkbox" formControlName="allowLineBreak" />
+        <label cFormCheckLabel for="colLineBreak">Cubrir todo el ancho (línea aparte, sin encabezado)</label>
+      </c-form-check>
+      <div cFormText>Máximo {{ maxLineBreakColumns }}: la primera se imprime antes de la fila y la última después.</div>
     </form>
   </c-modal-body>
   <c-modal-footer>

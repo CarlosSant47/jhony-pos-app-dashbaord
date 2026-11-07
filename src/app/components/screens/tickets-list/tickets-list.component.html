@@ -31,35 +31,30 @@
   </c-modal-header>
   <c-modal-body class="editor-body">
     @if (editorVisible()) {
-    <c-card class="mb-4">
-      <c-card-header><strong>Datos del ticket</strong></c-card-header>
-      <c-card-body>
-        <form cForm [formGroup]="metaForm">
-          <c-row>
-            <c-col md="5" class="mb-3">
-              <label cLabel for="ticketName">Nombre</label>
-              <input cFormControl id="ticketName" type="text" formControlName="name" maxlength="100"
-                [valid]="metaForm.controls.name.invalid && (metaForm.controls.name.touched || submitted()) ? false : undefined" />
-              @if (metaForm.controls.name.invalid && (metaForm.controls.name.touched || submitted())) {
-              <div class="text-danger small mt-1">El nombre es obligatorio.</div>
-              }
-            </c-col>
-            <c-col md="5" class="mb-3">
-              <label cLabel for="ticketDescription">Descripción</label>
-              <input cFormControl id="ticketDescription" type="text" formControlName="description" maxlength="255" />
-            </c-col>
-            <c-col md="2" class="mb-3 d-flex align-items-end">
-              <c-form-check switch>
-                <input cFormCheckInput id="ticketActive" type="checkbox" formControlName="active" />
-                <label cFormCheckLabel for="ticketActive">Activo</label>
-              </c-form-check>
-            </c-col>
-          </c-row>
-        </form>
-      </c-card-body>
-    </c-card>
-
-    <app-tickets-editor [template]="editorTemplate()" />
+    <app-tickets-editor [template]="editorTemplate()">
+      <form cForm [formGroup]="metaForm">
+        <c-row>
+          <c-col md="5" class="mb-2">
+            <label cLabel for="ticketName">Nombre</label>
+            <input cFormControl id="ticketName" type="text" formControlName="name" maxlength="100"
+              [valid]="metaForm.controls.name.invalid && (metaForm.controls.name.touched || submitted()) ? false : undefined" />
+            @if (metaForm.controls.name.invalid && (metaForm.controls.name.touched || submitted())) {
+            <div class="text-danger small mt-1">El nombre es obligatorio.</div>
+            }
+          </c-col>
+          <c-col md="5" class="mb-2">
+            <label cLabel for="ticketDescription">Descripción</label>
+            <input cFormControl id="ticketDescription" type="text" formControlName="description" maxlength="255" />
+          </c-col>
+          <c-col md="2" class="mb-2 d-flex align-items-end">
+            <c-form-check switch>
+              <input cFormCheckInput id="ticketActive" type="checkbox" formControlName="active" />
+              <label cFormCheckLabel for="ticketActive">Activo</label>
+            </c-form-check>
+          </c-col>
+        </c-row>
+      </form>
+    </app-tickets-editor>
     }
   </c-modal-body>
   <c-modal-footer>
