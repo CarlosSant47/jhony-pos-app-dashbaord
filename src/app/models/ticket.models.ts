@@ -5,7 +5,9 @@ export type TicketContentType = 'TEXT' | 'TABLE' | 'BARCODE' | 'QRCODE' | 'IMAGE
 export type TicketBarcodeType = 'EAN8' | 'EAN13' | 'UPCA' | 'UPCE' | 'CODE128';
 export type TicketBarcodeTextPosition = 'ABOVE' | 'BELOW' | 'NONE';
 export type TicketDataType = 'TEXT' | 'INTEGER' | 'MONEY';
-export type TicketSection = 'header' | 'body';
+export type TicketSection = 'header' | 'body' | 'footer';
+/** What the editor shows: only the body, or the header and footer of a sell point. */
+export type TicketEditorMode = 'body' | 'sell-point';
 
 export interface TicketColumn {
   field: string;
@@ -68,9 +70,16 @@ export type TicketElement =
   | TicketImageElement;
 
 export interface TicketTemplate {
-  header: TicketElement[];
   body: TicketElement[];
 }
+
+export interface TicketSellPointLayout {
+  header: TicketElement[];
+  footer: TicketElement[];
+}
+
+/** All sections the editor can hold; each mode uses a subset. */
+export type TicketLayout = TicketTemplate & TicketSellPointLayout;
 
 export interface TicketPreviewSettings {
   dpi: number;
@@ -134,14 +143,37 @@ export interface Page<T> {
 }
 
 export const createDefaultTemplate = (): TicketTemplate => ({
-  header: [
-        { position: 'CENTER', typeContent: 'TEXT', content: '', bold: true, maxChars: 32, dataType: 'TEXT' },
-            { position: 'CENTER', typeContent: 'TEXT', content: '', bold: true, maxChars: 32, dataType: 'TEXT' },
-    { position: 'CENTER', typeContent: 'TEXT', content: 'Title', bold: true, maxChars: 32, dataType: 'TEXT' },
-    { position: 'CENTER', typeContent: 'TEXT', content: '', bold: true, maxChars: 32, dataType: 'TEXT' },
-    { position: 'CENTER', typeContent: 'TEXT', content: '', bold: true, maxChars: 32, dataType: 'TEXT' },
-  ],
   body: [
     { position: 'LEFT', typeContent: 'TEXT', content: 'Body', bold: false, maxChars: 32, dataType: 'TEXT' },
   ]
 });
+
+export const createDefaultSellPointLayout = (): TicketSellPointLayout => ({
+  header: [
+    { position: 'CENTER', typeContent: 'TEXT', content: 'Title', bold: true, maxChars: 32, dataType: 'TEXT' },
+  ],
+  footer: [
+    { position: 'CENTER', typeContent: 'TEXT', content: 'Gracias por su compra', bold: false, maxChars: 32, dataType: 'TEXT' },
+  ]
+});
+
+/** header and footer are JSON-serialized TicketElement[]. */
+export interface TicketTemplateSellPoint {
+  id: string;
+  sellPointId: number;
+  sellPointName?: string;
+  header: string;
+  footer: string;
+}
+
+export type TicketTemplateSellPointPayload = Pick<TicketTemplateSellPoint, 'sellPointId' | 'header' | 'footer'>;
+
+/** GET /v1/sell-point. */
+export interface SellPoint {
+  sellPointId: number;
+  name: string;
+  rfc: string;
+  fullAddress: string;
+  phone: string;
+  email: string;
+}

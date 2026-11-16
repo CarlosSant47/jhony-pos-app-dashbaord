@@ -1,3 +1,39 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.ticket-page {
+  height: 100%;
+  padding-bottom: 1.5rem;
+}
+
+.ticket-page-column,
+.ticket-card {
+  height: 100%;
+  min-height: 0;
+}
+
+.ticket-card-body,
+.ticket-tabs {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ticket-tabs-content {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.ticket-preview-panel {
+  height: 100%;
+}
+
 .search-box {
   max-width: 280px;
 }

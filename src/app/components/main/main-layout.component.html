@@ -24,13 +24,13 @@
 </c-sidebar>
 
 <!--main-->
-<div class="wrapper d-flex flex-column min-vh-100">
+<div class="wrapper d-flex flex-column">
   <!--app-header-->
   <app-default-header [cShadowOnScroll]="'sm'" class="mb-4 d-print-none header header-sticky p-0 shadow-sm"
     position="sticky" sidebarId="sidebar1" />
   <!--app-body-->
   <div class="body flex-grow-1">
-    <c-container breakpoint="lg" class="h-auto px-4">
+    <c-container breakpoint="lg" class="px-4">
       <router-outlet />
     </c-container>
   </div>

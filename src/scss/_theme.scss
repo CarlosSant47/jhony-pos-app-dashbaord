@@ -7,9 +7,24 @@ body {
 
 .wrapper {
   width: 100%;
+  min-height: 100vh;
   padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
   will-change: auto;
   @include transition(padding .15s);
+}
+
+.wrapper:has(app-tickets-list) {
+  height: 100dvh;
+  min-height: 100dvh;
+
+  > .body {
+    min-height: 0;
+  }
+
+  > .body > c-container {
+    height: 100%;
+    max-width: none;
+  }
 }
 
 .header > .container-fluid,

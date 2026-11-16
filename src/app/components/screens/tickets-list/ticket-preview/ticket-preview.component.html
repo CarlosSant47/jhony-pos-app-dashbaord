@@ -1,0 +1,28 @@
+<div class="preview-layout">
+  <div class="source-panel">
+    <label for="ticket-source" class="form-label fw-semibold">Texto generado por la librería</label>
+    <p id="ticket-source-help" class="text-body-secondary small">
+      Pega o edita el texto del ticket. Se admiten [L], [C], [R] y &lt;b&gt;...&lt;/b&gt;.
+    </p>
+    <textarea #ticketSource id="ticket-source" class="form-control ticket-source"
+      aria-describedby="ticket-source-help" spellcheck="false"
+      placeholder="[C]&lt;b&gt;TICKET DE VENTA&lt;/b&gt;&#10;[L]FOLIO: 0069154&#10;[R]TOTAL: $203.00"
+      [value]="source()" (input)="source.set(ticketSource.value)"></textarea>
+  </div>
+
+  <section class="preview-panel" aria-labelledby="ticket-preview-title">
+    <h5 id="ticket-preview-title">Vista previa</h5>
+    <p class="text-body-secondary small">Vista aproximada en papel de 32 caracteres por línea.</p>
+    <div class="preview-wrapper">
+      @if (lines().length) {
+      <div class="ticket-paper">
+        @for (line of lines(); track $index) {
+        <div class="ticket-line" [style.text-align]="line.alignment">@for (segment of line.segments; track $index) {<span [class.bold]="segment.bold">{{ segment.text }}</span>}</div>
+        }
+      </div>
+      } @else {
+      <p class="text-body-secondary mb-0">Pega un ticket para ver su vista previa.</p>
+      }
+    </div>
+  </section>
+</div>

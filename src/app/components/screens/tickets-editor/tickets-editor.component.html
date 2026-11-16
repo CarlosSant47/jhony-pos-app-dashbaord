@@ -319,7 +319,7 @@
         <div cFormText>Dato de cada fila, ej. productName, quantity, price.</div>
       </div>
       <c-row>
-        <c-col md="2" class="mb-3">
+        <c-col md="12" class="mb-3">
           <label cLabel>Alineación</label>
           <c-button-group class="d-flex" role="group" aria-label="Alineación">
             @for (p of positions; track p.value) {
@@ -348,11 +348,11 @@
             }
           </c-button-group>
         </c-col>
-        <c-col md="4" class="mb-3">
+        <c-col md="6" class="mb-3">
           <label cLabel for="colMax">Máx. caracteres</label>
           <input cFormControl id="colMax" type="number" min="1" formControlName="maxChars" />
         </c-col>
-        <c-col md="4" class="mb-3">
+        <c-col md="6" class="mb-3">
           <label cLabel for="colType">Tipo de dato</label>
           <select cSelect id="colType" formControlName="dataType">
             @for (d of dataTypes; track d.value) {

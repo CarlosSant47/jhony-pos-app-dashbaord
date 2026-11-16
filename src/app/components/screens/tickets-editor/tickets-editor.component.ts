@@ -38,8 +38,12 @@ import {
   TicketSection,
   TicketTableElement,
   Selection,
+  TicketEditorMode,
+  TicketLayout,
+  TicketSellPointLayout,
   TicketTemplate,
   createDefaultTemplate,
+  createDefaultSellPointLayout,
   TextSegment,
   MediaBlock,
   TicketBarcodeElement,
@@ -120,10 +124,20 @@ export class TicketsEditorComponent implements OnInit {
     { value: 'INTEGER', label: 'Número entero' },
     { value: 'MONEY', label: 'Dinero' }
   ];
-  readonly sections: { value: TicketSection; label: string }[] = [
+  readonly allSections: { value: TicketSection; label: string }[] = [
     { value: 'header', label: 'Encabezado' },
-    { value: 'body', label: 'Cuerpo' }
+    { value: 'body', label: 'Cuerpo' },
+    { value: 'footer', label: 'Pie de página' }
   ];
+  private static readonly MODE_SECTIONS: Record<TicketEditorMode, TicketSection[]> = {
+    body: ['body'],
+    'sell-point': ['header', 'footer']
+  };
+
+  get sections(): { value: TicketSection; label: string }[] {
+    const visible = TicketsEditorComponent.MODE_SECTIONS[this.mode];
+    return this.allSections.filter(s => visible.includes(s.value));
+  }
   readonly elementTypes: { value: TicketContentType; label: string }[] = [
     { value: 'TEXT', label: 'Texto' },
     { value: 'TABLE', label: 'Tabla' },
@@ -153,9 +167,11 @@ export class TicketsEditorComponent implements OnInit {
     showGrid: [false]
   });
 
-  @Input() template: TicketTemplate | null = null;
+  /** 'body' edits only the content; 'sell-point' edits only header and footer. */
+  @Input() mode: TicketEditorMode = 'body';
+  @Input() template: Partial<TicketLayout> | null = null;
 
-  ticket: TicketTemplate = createDefaultTemplate();
+  ticket: TicketLayout = { header: [], body: [], footer: [] };
   private initialSnapshot = '';
 
   activeTab: 'data' | 'format' | 'insert' | 'settings' = 'data';
@@ -170,7 +186,11 @@ export class TicketsEditorComponent implements OnInit {
   columnForm: FormGroup = this.buildColumn();
 
   ngOnInit(): void {
-    this.ticket = this.template ? structuredClone(this.template) : createDefaultTemplate();
+    const defaults: Partial<TicketLayout> = this.mode === 'body' ? createDefaultTemplate() : createDefaultSellPointLayout();
+    const source = this.template ?? defaults;
+    const ticket: TicketLayout = { header: [], body: [], footer: [] };
+    for (const s of this.sections) ticket[s.value] = structuredClone(source[s.value] ?? defaults[s.value] ?? []);
+    this.ticket = ticket;
     this.initialSnapshot = JSON.stringify(this.ticket);
     this.elementForm.valueChanges.subscribe(() => this.applyElementForm());
   }
@@ -491,7 +511,11 @@ export class TicketsEditorComponent implements OnInit {
   }
 
   getTemplate(): TicketTemplate {
-    return structuredClone(this.ticket);
+    return { body: structuredClone(this.ticket.body) };
+  }
+
+  getSellPointLayout(): TicketSellPointLayout {
+    return { header: structuredClone(this.ticket.header), footer: structuredClone(this.ticket.footer) };
   }
 
   isDirty(): boolean {

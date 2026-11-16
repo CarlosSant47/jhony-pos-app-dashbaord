@@ -2,6 +2,13 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.1.
 
+## Vista previa de impresión de tickets
+
+En **Tickets > Vista previa de impresión**, pega o edita el texto generado por la librería.
+La vista previa interpreta `[L]`, `[C]` y `[R]` al inicio de cada línea y los pares
+`<b>...</b>` para negritas. Conserva espacios y líneas vacías y muestra una aproximación
+de 32 caracteres por línea. El texto no se guarda ni modifica las plantillas.
+
 ## Development server
 
 To start a local development server, run:

@@ -8,3 +8,11 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL', {
   providedIn: 'root',
   factory: () => '/api/admin'
 });
+
+/** Paths relative to API_BASE_URL. */
+export const API_ENDPOINTS = {
+  ticketTemplates: '/v1/ticket-templates',
+  ticketTemplateSellPoint: '/v1/ticket-template-sell-points',
+  /** GET -> SellPoint[]. */
+  sellPoint: '/v1/sell-points'
+} as const;
